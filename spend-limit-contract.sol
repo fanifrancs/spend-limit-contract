@@ -94,3 +94,7 @@ contract AllowanceWallet {
         emit EmergencyWithdraw(owner, balance);
     }
 }
+
+//Modern, safe replacement for .transfer() is call{value: ...}
+//  with reentrancy protection + CEI pattern. I forgot to use
+//  this
