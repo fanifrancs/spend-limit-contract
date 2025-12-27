@@ -14,6 +14,7 @@ contract AllowanceWallet {
     event Deposit(address indexed from, uint256 amount);
     event AllowanceSet(address indexed spender, uint256 amount);
     event Spent(address indexed spender, uint256 amount);
+    event EmergencyWithdraw(address indexed owner, uint256 amount);
     event Paused();
     event Unpaused();
 
@@ -71,5 +72,25 @@ contract AllowanceWallet {
 
     function getBalance() public view returns (uint256) {
         return address(this).balance;
+    }
+
+     //emergency ETH withdrawal by owner. Typically used when
+     // paused == true (but not required). Note: In production,
+     // protocols often restrict emergency withdraw to paused
+     // state only or add a timelock or require multisig approval
+    function emergencyWithdraw(uint256 _amount) external onlyOwner {
+        require(address(this).balance >= _amount, "Insufficient contract balance");
+
+        payable(owner).transfer(_amount);
+        emit EmergencyWithdraw(owner, _amount);
+    }
+
+    // emergency withdraw ALL ETH
+    function emergencyWithdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No ETH to withdraw");
+
+        payable(owner).transfer(balance);
+        emit EmergencyWithdraw(owner, balance);
     }
 }
